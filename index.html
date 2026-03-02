@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NEET Master Question Bank</title>
     <style>
+        /* LIGHT MODE VARIABLES */
         :root {
             --bg-color: #f4f7f9;
             --surface-color: #ffffff;
@@ -18,6 +19,20 @@
             --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
 
+        /* DARK MODE VARIABLES */
+        [data-theme="dark"] {
+            --bg-color: #0d1117;
+            --surface-color: #161b22;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --border-color: #30363d;
+            --accent-main: #58a6ff; 
+            --accent-bio: #3fb950;
+            --accent-phy: #d2a8ff;
+            --accent-chem: #f0883e;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
@@ -25,13 +40,30 @@
             margin: 0;
             padding: 40px 20px;
             line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
         }
 
-        .header { text-align: center; margin-bottom: 30px; }
+        .header { text-align: center; margin-bottom: 30px; position: relative; }
         .header h1 { color: var(--accent-main); margin: 0; font-weight: 700; font-size: 2.2rem; }
 
-        /* Main Subject Tabs */
-        .tab-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .theme-toggle {
+            position: absolute;
+            top: 0;
+            right: 20px;
+            background: var(--surface-color);
+            color: var(--text-primary);
+            border: 2px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: var(--shadow);
+            transition: all 0.2s;
+        }
+        .theme-toggle:hover { border-color: var(--text-secondary); }
+
+        /* TABS */
+        .tab-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
         .tab {
             padding: 12px 35px;
             background: var(--surface-color);
@@ -49,27 +81,18 @@
         .tab.active-phy { border-color: var(--accent-phy); color: var(--accent-phy); }
         .tab.active-chem { border-color: var(--accent-chem); color: var(--accent-chem); }
 
-        /* Class Sub-Tabs */
+        /* SUB-TABS */
         .sub-tab-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; }
-        .sub-tab {
-            padding: 8px 20px;
-            background: var(--bg-color);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            color: var(--text-secondary);
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: bold;
-        }
+        .sub-tab { padding: 8px 20px; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 20px; color: var(--text-secondary); cursor: pointer; font-size: 0.9rem; font-weight: bold; }
         .sub-tab.active { background: var(--accent-main); color: white; border-color: var(--accent-main); }
 
-        /* Content Areas */
+        /* CONTENT AREAS */
         .subject-content { display: none; max-width: 850px; margin: 0 auto; }
         .subject-content.active { display: block; }
         .class-content { display: none; }
         .class-content.active { display: block; }
 
-        /* Accordions */
+        /* ACCORDIONS */
         .accordion {
             background-color: var(--surface-color);
             color: var(--text-primary);
@@ -89,7 +112,7 @@
         .accordion:hover { border-color: var(--text-secondary); }
         .accordion.active { border-left: 6px solid var(--accent-main); border-bottom-left-radius: 0; border-bottom-right-radius: 0; margin-bottom: 0; }
 
-        /* Panel Area */
+        /* PANELS */
         .panel {
             padding: 0 25px;
             background-color: var(--surface-color);
@@ -105,27 +128,47 @@
         }
         
         .placeholder-text { color: var(--text-secondary); font-style: italic; padding: 30px 0; text-align: center; }
+
+        /* SEARCH GOOGLE FLOATING BUTTON */
+        #search-tooltip {
+            position: absolute;
+            display: none;
+            background-color: var(--accent-main);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            z-index: 1000;
+            transform: translate(-50%, -120%);
+        }
+        #search-tooltip:hover { background-color: #003d82; }
+
     </style>
 </head>
 <body>
 
+    <div id="search-tooltip">🔍 Search Google</div>
+
     <div class="header">
-        <h1>NEET PYQ'S <BR>
-        POWERED BY SF</h1>
+        <h1>NEET Strategic Interface</h1>
+        <button class="theme-toggle" onclick="toggleTheme()">Dark Mode 🌙 <br > Light Mode ☀️</button>
     </div>
 
     <div class="tab-container">
-        <button class="tab" onclick="openSubject(event, 'Physics', 'active-phy')">Physics</button>
-        <button class="tab" onclick="openSubject(event, 'Chemistry', 'active-chem')">Chemistry</button>
-        <button class="tab active-bio" onclick="openSubject(event, 'Biology', 'active-bio')">Biology</button>
+        <button class="tab" id="tab-Physics" onclick="openSubject(event, 'Physics', 'active-phy')">Physics</button>
+        <button class="tab" id="tab-Chemistry" onclick="openSubject(event, 'Chemistry', 'active-chem')">Chemistry</button>
+        <button class="tab" id="tab-Biology" onclick="openSubject(event, 'Biology', 'active-bio')">Biology</button>
     </div>
 
-    <div id="Biology" class="subject-content active">
-        
+    <div id="Biology" class="subject-content">
         <div class="sub-tab-container">
-            <button class="sub-tab active" onclick="openClass(event, 'bio-11', 'Biology')">Class 11</button>
-            <button class="sub-tab" onclick="openClass(event, 'bio-12', 'Biology')">Class 12</button>
+            <button class="sub-tab" id="sub-bio-11" onclick="openClass(event, 'bio-11', 'Biology')">Class 11</button>
+            <button class="sub-tab" id="sub-bio-12" onclick="openClass(event, 'bio-12', 'Biology')">Class 12</button>
         </div>
+
 
         <div id="bio-11" class="class-content active">
   <button class="accordion">Chapter 1: The Living World</button>
@@ -14245,52 +14288,125 @@
         </div>
     </div>
 
-    <script>
-        // Subject Switching
-        function openSubject(evt, subjectName, activeClass) {
-            var tabcontent = document.getElementsByClassName("subject-content");
-            for (var i = 0; i < tabcontent.length; i++) { tabcontent[i].style.display = "none"; }
-            
-            var tablinks = document.getElementsByClassName("tab");
-            for (var i = 0; i < tablinks.length; i++) { 
-                tablinks[i].className = tablinks[i].className.replace(" active-bio", "").replace(" active-phy", "").replace(" active-chem", ""); 
-            }
-            
-            document.getElementById(subjectName).style.display = "block";
-            evt.currentTarget.className += " " + activeClass;
+   <script>
+        // --- THEME LOGIC ---
+        const savedTheme = localStorage.getItem('neet-theme') || 'light';
+        if (savedTheme === 'dark') document.body.setAttribute('data-theme', 'dark');
+
+        function toggleTheme() {
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            const newTheme = isDark ? 'light' : 'dark';
+            document.body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('neet-theme', newTheme);
         }
 
-        // Class Switching (11 vs 12)
-        function openClass(evt, className, parentSubject) {
-            var subjectDiv = document.getElementById(parentSubject);
-            var classContents = subjectDiv.getElementsByClassName("class-content");
-            for (var i = 0; i < classContents.length; i++) {
-                classContents[i].style.display = "none";
-                classContents[i].classList.remove("active");
-            }
+        // --- SESSION MEMORY & TAB SWITCHING ---
+        function openSubject(evt, subjectName, activeClass) {
+            document.querySelectorAll(".subject-content").forEach(el => el.style.display = "none");
+            document.querySelectorAll(".tab").forEach(el => el.className = "tab");
             
-            var subTabs = subjectDiv.getElementsByClassName("sub-tab");
-            for (var i = 0; i < subTabs.length; i++) { subTabs[i].classList.remove("active"); }
+            document.getElementById(subjectName).style.display = "block";
+            if(evt) evt.currentTarget.className = "tab " + activeClass;
+            else document.getElementById("tab-" + subjectName).className = "tab " + activeClass;
+
+            localStorage.setItem('activeSubject', subjectName);
+        }
+
+        function openClass(evt, className, parentSubject) {
+            let subjectDiv = document.getElementById(parentSubject);
+            subjectDiv.querySelectorAll(".class-content").forEach(el => {
+                el.style.display = "none";
+                el.classList.remove("active");
+            });
+            subjectDiv.querySelectorAll(".sub-tab").forEach(el => el.classList.remove("active"));
             
             document.getElementById(className).style.display = "block";
             document.getElementById(className).classList.add("active");
-            evt.currentTarget.classList.add("active");
+            
+            if(evt) evt.currentTarget.classList.add("active");
+            else document.getElementById("sub-" + className).classList.add("active");
+
+            localStorage.setItem('activeClass-' + parentSubject, className);
         }
 
-        // Accordion functionality
-        var acc = document.getElementsByClassName("accordion");
-        for (var i = 0; i < acc.length; i++) {
-            acc[i].addEventListener("click", function() {
+        // --- ACCORDION LOGIC WITH MEMORY ---
+        function saveOpenAccordions() {
+            let openAccs = [];
+            document.querySelectorAll('.accordion').forEach(acc => {
+                if(acc.classList.contains('active')) openAccs.push(acc.getAttribute('data-index'));
+            });
+            localStorage.setItem('openAccordions', JSON.stringify(openAccs));
+        }
+
+        document.querySelectorAll(".accordion").forEach(acc => {
+            acc.addEventListener("click", function() {
                 this.classList.toggle("active");
                 var panel = this.nextElementSibling;
                 if (panel.style.maxHeight) {
                     panel.style.maxHeight = null;
                 } else {
-                    panel.style.maxHeight = panel.scrollHeight + 50 + "px";
-                } 
+                    panel.style.maxHeight = panel.scrollHeight + 2000 + "px"; // Huge buffer for 1400 MCQs
+                }
+                saveOpenAccordions();
             });
-        }
+        });
+
+        // --- RESTORE SESSION ON LOAD ---
+        window.addEventListener('DOMContentLoaded', () => {
+            // Restore Subject
+            const activeSubj = localStorage.getItem('activeSubject') || 'Biology';
+            const subjClassMap = { 'Biology': 'active-bio', 'Physics': 'active-phy', 'Chemistry': 'active-chem' };
+            openSubject(null, activeSubj, subjClassMap[activeSubj]);
+
+            // Restore Sub-classes
+            ['Biology', 'Physics', 'Chemistry'].forEach(subj => {
+                const activeCls = localStorage.getItem('activeClass-' + subj);
+                if(activeCls) openClass(null, activeCls, subj);
+                else {
+                    // Default to Class 11 if none saved
+                    let defaultClass = subj.substring(0,3).toLowerCase() + '11';
+                    if(subj==='Biology') defaultClass='bio-11';
+                    if(subj==='Physics') defaultClass='phy-11';
+                    if(subj==='Chemistry') defaultClass='chem-11';
+                    openClass(null, defaultClass, subj);
+                }
+            });
+
+            // Restore Accordions
+            const openAccs = JSON.parse(localStorage.getItem('openAccordions')) || [];
+            document.querySelectorAll('.accordion').forEach(acc => {
+                if (openAccs.includes(acc.getAttribute('data-index'))) {
+                    acc.classList.add('active');
+                    // Needs a slight delay for DOM rendering before calculating scrollHeight
+                    setTimeout(() => {
+                        acc.nextElementSibling.style.maxHeight = acc.nextElementSibling.scrollHeight + 2000 + "px";
+                    }, 100);
+                }
+            });
+        });
+
+        // --- GOOGLE SEARCH HIGHLIGHTER ---
+        document.addEventListener('mouseup', function(e) {
+            let selection = window.getSelection().toString().trim();
+            let tooltip = document.getElementById('search-tooltip');
+            
+            if (selection.length > 0) {
+                tooltip.style.display = 'block';
+                tooltip.style.left = e.pageX + 'px';
+                tooltip.style.top = e.pageY + 'px';
+                
+                tooltip.onclick = function() {
+                    window.open('https://www.google.com/search?q=' + encodeURIComponent(selection) + ' neet', '_blank');
+                    window.getSelection().removeAllRanges(); // Clear selection after clicking
+                    tooltip.style.display = 'none';
+                };
+            } else {
+                // If clicked away, hide it
+                if(e.target !== tooltip) {
+                    tooltip.style.display = 'none';
+                }
+            }
+        });
     </script>
 </body>
-
 </html>
