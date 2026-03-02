@@ -60,7 +60,6 @@
             box-shadow: var(--shadow);
             transition: all 0.2s;
         }
-        .theme-toggle:hover { border-color: var(--text-secondary); }
 
         /* TABS */
         .tab-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
@@ -75,14 +74,15 @@
             font-size: 1rem;
             transition: all 0.2s ease;
             box-shadow: var(--shadow);
+            flex: 1 1 auto;
+            text-align: center;
         }
-        .tab:hover { background: var(--bg-color); }
         .tab.active-bio { border-color: var(--accent-bio); color: var(--accent-bio); }
         .tab.active-phy { border-color: var(--accent-phy); color: var(--accent-phy); }
         .tab.active-chem { border-color: var(--accent-chem); color: var(--accent-chem); }
 
         /* SUB-TABS */
-        .sub-tab-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; }
+        .sub-tab-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; }
         .sub-tab { padding: 8px 20px; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 20px; color: var(--text-secondary); cursor: pointer; font-size: 0.9rem; font-weight: bold; }
         .sub-tab.active { background: var(--accent-main); color: white; border-color: var(--accent-main); }
 
@@ -108,8 +108,8 @@
             transition: all 0.3s ease;
             margin-bottom: 10px;
             box-shadow: var(--shadow);
+            box-sizing: border-box; 
         }
-        .accordion:hover { border-color: var(--text-secondary); }
         .accordion.active { border-left: 6px solid var(--accent-main); border-bottom-left-radius: 0; border-bottom-right-radius: 0; margin-bottom: 0; }
 
         /* PANELS */
@@ -125,36 +125,57 @@
             border-bottom-left-radius: 8px;
             border-bottom-right-radius: 8px;
             margin-bottom: 10px;
+            box-sizing: border-box;
         }
         
         .placeholder-text { color: var(--text-secondary); font-style: italic; padding: 30px 0; text-align: center; }
 
-        /* SEARCH GOOGLE FLOATING BUTTON */
-        #search-tooltip {
-            position: absolute;
-            display: none;
+        /* MOBILE BOTTOM SEARCH BAR */
+        #mobile-search-bar {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
             background-color: var(--accent-main);
             color: white;
-            padding: 8px 15px;
-            border-radius: 6px;
+            padding: 14px 28px;
+            border-radius: 50px;
             font-weight: bold;
-            font-size: 0.9rem;
+            font-size: 1rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            z-index: 1000;
-            transform: translate(-50%, -120%);
+            z-index: 9999;
+            display: none; 
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            border: 2px solid var(--surface-color);
         }
-        #search-tooltip:hover { background-color: #003d82; }
+
+        /* RESPONSIVE DESIGN FOR PHONES */
+        @media (max-width: 600px) {
+            body { padding: 15px 10px; }
+            .header { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-bottom: 20px; }
+            .header h1 { font-size: 1.6rem; }
+            .theme-toggle { position: relative; right: auto; top: auto; width: 100%; max-width: 200px; }
+            .tab { padding: 10px 15px; font-size: 0.95rem; }
+            .sub-tab { padding: 6px 15px; font-size: 0.85rem; }
+            .accordion { padding: 15px; font-size: 1rem; }
+            .panel { padding: 0 15px; }
+        }
 
     </style>
 </head>
 <body>
 
-    <div id="search-tooltip">🔍 Search Google</div>
-
+   <div id="mobile-search-bar" onmousedown="forceSearch(event)" ontouchend="forceSearch(event)">
+        🔍 Search Solution
+    </div>
     <div class="header">
-        <h1>NEET Strategic Interface</h1>
-        <button class="theme-toggle" onclick="toggleTheme()">Dark Mode 🌙 <br > Light Mode ☀️</button>
+        <h1>NEET QUESTION BANK <BR>
+        POWERED BY SF
+        </h1>
+        <button class="theme-toggle" onclick="toggleTheme()">🌓 DAY/NIGHT</button>
     </div>
 
     <div class="tab-container">
@@ -168,8 +189,6 @@
             <button class="sub-tab" id="sub-bio-11" onclick="openClass(event, 'bio-11', 'Biology')">Class 11</button>
             <button class="sub-tab" id="sub-bio-12" onclick="openClass(event, 'bio-12', 'Biology')">Class 12</button>
         </div>
-
-
         <div id="bio-11" class="class-content active">
   <button class="accordion">Chapter 1: The Living World</button>
 <div class="panel"><div class="placeholder-text">[Awaiting Data]</div></div>
@@ -14288,7 +14307,7 @@
         </div>
     </div>
 
-   <script>
+     <script>
         // --- THEME LOGIC ---
         const savedTheme = localStorage.getItem('neet-theme') || 'light';
         if (savedTheme === 'dark') document.body.setAttribute('data-theme', 'dark');
@@ -14307,63 +14326,86 @@
             
             document.getElementById(subjectName).style.display = "block";
             if(evt) evt.currentTarget.className = "tab " + activeClass;
-            else document.getElementById("tab-" + subjectName).className = "tab " + activeClass;
+            else {
+                let tabBtn = document.getElementById("tab-" + subjectName);
+                if(tabBtn) tabBtn.className = "tab " + activeClass;
+            }
 
             localStorage.setItem('activeSubject', subjectName);
+            
+            // Close all accordions when switching subjects to keep UI clean
+            closeAllAccordions();
         }
 
         function openClass(evt, className, parentSubject) {
             let subjectDiv = document.getElementById(parentSubject);
+            if (!subjectDiv) return;
+            
             subjectDiv.querySelectorAll(".class-content").forEach(el => {
                 el.style.display = "none";
                 el.classList.remove("active");
             });
             subjectDiv.querySelectorAll(".sub-tab").forEach(el => el.classList.remove("active"));
             
-            document.getElementById(className).style.display = "block";
-            document.getElementById(className).classList.add("active");
+            let targetClass = document.getElementById(className);
+            if (targetClass) {
+                targetClass.style.display = "block";
+                targetClass.classList.add("active");
+            }
             
             if(evt) evt.currentTarget.classList.add("active");
-            else document.getElementById("sub-" + className).classList.add("active");
+            else {
+                let subBtn = document.getElementById("sub-" + className);
+                if(subBtn) subBtn.classList.add("active");
+            }
 
             localStorage.setItem('activeClass-' + parentSubject, className);
+            
+            // Close all accordions when switching classes to keep UI clean
+            closeAllAccordions();
         }
 
-        // --- ACCORDION LOGIC WITH MEMORY ---
-        function saveOpenAccordions() {
-            let openAccs = [];
+        // --- ACCORDION LOGIC ---
+        function closeAllAccordions() {
             document.querySelectorAll('.accordion').forEach(acc => {
-                if(acc.classList.contains('active')) openAccs.push(acc.getAttribute('data-index'));
+                acc.classList.remove('active');
+                if (acc.nextElementSibling) {
+                    acc.nextElementSibling.style.maxHeight = null;
+                }
             });
-            localStorage.setItem('openAccordions', JSON.stringify(openAccs));
         }
 
-        document.querySelectorAll(".accordion").forEach(acc => {
-            acc.addEventListener("click", function() {
-                this.classList.toggle("active");
-                var panel = this.nextElementSibling;
-                if (panel.style.maxHeight) {
-                    panel.style.maxHeight = null;
-                } else {
-                    panel.style.maxHeight = panel.scrollHeight + 2000 + "px"; // Huge buffer for 1400 MCQs
+        // Using event delegation so accordions pasted later will still work seamlessly
+        document.body.addEventListener("click", function(e) {
+            if(e.target && e.target.classList.contains("accordion")) {
+                let acc = e.target;
+                
+                // Optional: If you want only ONE chapter open at a time, uncomment the next line:
+                // closeAllAccordions(); 
+
+                acc.classList.toggle("active");
+                var panel = acc.nextElementSibling;
+                if (panel && panel.classList.contains("panel")) {
+                    if (panel.style.maxHeight) {
+                        panel.style.maxHeight = null;
+                        acc.classList.remove("active"); // Ensure arrow/border resets
+                    } else {
+                        panel.style.maxHeight = panel.scrollHeight + 5000 + "px"; // Massive buffer for huge question banks
+                    }
                 }
-                saveOpenAccordions();
-            });
+            }
         });
 
-        // --- RESTORE SESSION ON LOAD ---
+        // --- RESTORE SESSION ON LOAD (Tabs only, NOT accordions) ---
         window.addEventListener('DOMContentLoaded', () => {
-            // Restore Subject
             const activeSubj = localStorage.getItem('activeSubject') || 'Biology';
             const subjClassMap = { 'Biology': 'active-bio', 'Physics': 'active-phy', 'Chemistry': 'active-chem' };
             openSubject(null, activeSubj, subjClassMap[activeSubj]);
 
-            // Restore Sub-classes
             ['Biology', 'Physics', 'Chemistry'].forEach(subj => {
                 const activeCls = localStorage.getItem('activeClass-' + subj);
                 if(activeCls) openClass(null, activeCls, subj);
                 else {
-                    // Default to Class 11 if none saved
                     let defaultClass = subj.substring(0,3).toLowerCase() + '11';
                     if(subj==='Biology') defaultClass='bio-11';
                     if(subj==='Physics') defaultClass='phy-11';
@@ -14371,42 +14413,42 @@
                     openClass(null, defaultClass, subj);
                 }
             });
-
-            // Restore Accordions
-            const openAccs = JSON.parse(localStorage.getItem('openAccordions')) || [];
-            document.querySelectorAll('.accordion').forEach(acc => {
-                if (openAccs.includes(acc.getAttribute('data-index'))) {
-                    acc.classList.add('active');
-                    // Needs a slight delay for DOM rendering before calculating scrollHeight
-                    setTimeout(() => {
-                        acc.nextElementSibling.style.maxHeight = acc.nextElementSibling.scrollHeight + 2000 + "px";
-                    }, 100);
-                }
-            });
-        });
-
-        // --- GOOGLE SEARCH HIGHLIGHTER ---
-        document.addEventListener('mouseup', function(e) {
-            let selection = window.getSelection().toString().trim();
-            let tooltip = document.getElementById('search-tooltip');
             
-            if (selection.length > 0) {
-                tooltip.style.display = 'block';
-                tooltip.style.left = e.pageX + 'px';
-                tooltip.style.top = e.pageY + 'px';
-                
-                tooltip.onclick = function() {
-                    window.open('https://www.google.com/search?q=' + encodeURIComponent(selection) + ' neet', '_blank');
-                    window.getSelection().removeAllRanges(); // Clear selection after clicking
-                    tooltip.style.display = 'none';
-                };
-            } else {
-                // If clicked away, hide it
-                if(e.target !== tooltip) {
-                    tooltip.style.display = 'none';
-                }
-            }
+            // Ensures all panels are completely shut when you load the page
+            closeAllAccordions(); 
         });
+
+      // --- UNIVERSAL TEXT SELECTION FOR MOBILE & DESKTOP ---
+        let currentSelection = "";
+        
+        document.addEventListener('selectionchange', function() {
+            // A tiny 50ms delay allows the mobile OS to register the highlight properly
+            setTimeout(() => {
+                currentSelection = window.getSelection().toString().trim();
+                let searchBar = document.getElementById('mobile-search-bar');
+                
+                if (currentSelection.length > 0) {
+                    searchBar.style.display = 'flex';
+                } else {
+                    searchBar.style.display = 'none';
+                }
+            }, 50);
+        });
+
+        function forceSearch(e) {
+            // This stops your phone from doing its weird default tap actions
+            e.preventDefault(); 
+            
+            if (currentSelection.length > 0) {
+                // 1. Open the Google Search Tab
+                let queryUrl = 'https://www.google.com/search?q=' + encodeURIComponent(currentSelection) + '+neet+solution';
+                window.open(queryUrl, '_blank');
+                
+                // 2. Force the button to disappear and clear the text highlight
+                window.getSelection().removeAllRanges();
+                document.getElementById('mobile-search-bar').style.display = 'none';
+            }
+        }
     </script>
 </body>
 </html>
